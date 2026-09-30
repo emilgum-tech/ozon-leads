@@ -79,5 +79,14 @@ input[type="number"] { width: 100%; }
     font-size: 40px; line-height: 1; cursor: pointer;
 }
 
+.tg-link {
+    display: inline-block; margin-top: 18px; padding: 12px 22px; border-radius: 999px;
+    background: #fff; color: var(--violet); font-weight: 700; text-decoration: none;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+}
+.tg-link:hover { opacity: .9; }
+.tg-note { text-align: center; margin: 16px 0 0; color: #6b5f8f; }
+.tg-note a { color: var(--violet); font-weight: 700; }
+
 [hidden] { display: none !important; }
 .check { display: flex; gap: 8px; align-items: center; font-weight: 400; margin-top: 8px; }
