@@ -62,11 +62,15 @@
             </form>
         </section>
         <section class="card gallery">
-            <img src="img/photo-1.jpg" alt="" loading="lazy">
-            <img src="img/photo-2.jpg" alt="" loading="lazy">
-            <img src="img/photo-3.jpg" alt="" loading="lazy">
+            <img tabindex="0" role="button" aria-label="Открыть картинку" src="img/photo-1.jpg" alt="" loading="lazy">
+            <img tabindex="0" role="button" aria-label="Открыть картинку" src="img/photo-2.jpg" alt="" loading="lazy">
+            <img tabindex="0" role="button" aria-label="Открыть картинку" src="img/photo-3.jpg" alt="" loading="lazy">
         </section>
     </main>
+    <div class="lightbox" id="lightbox" hidden>
+        <button type="button" class="lightbox-close" aria-label="Закрыть">&times;</button>
+        <img alt="">
+    </div>
 <script>
 (function () {
     // Заявки уходят на воркер Cloudflare, он пересылает их в Telegram (токен бота хранится только там).
@@ -124,6 +128,19 @@
             say('Нет связи, попробуйте позже.', 'danger');
         }).then(function () { btn.disabled = false; });
     });
+})();
+</script>
+<script>
+(function () {
+    var box = document.getElementById('lightbox'), big = box.querySelector('img');
+    function open(src) { big.src = src; box.hidden = false; document.body.style.overflow = 'hidden'; }
+    function close() { box.hidden = true; big.removeAttribute('src'); document.body.style.overflow = ''; }
+    document.querySelectorAll('.gallery img').forEach(function (img) {
+        img.addEventListener('click', function () { open(img.src); });
+        img.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(img.src); } });
+    });
+    box.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !box.hidden) close(); });
 })();
 </script>
 </body>
