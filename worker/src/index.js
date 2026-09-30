@@ -1,28 +1,31 @@
 ﻿// Прокси заявок: принимает форму с сайта и пересылает в Telegram.
 // Токен бота и chat_id лежат в секретах воркера (BOT_TOKEN, CHAT_ID), на сайте их нет.
 
-const ALLOWED_ORIGIN = "https://emilgum-tech.github.io";
+const ALLOWED_ORIGINS = ["https://ozon-leads.pages.dev", "https://emilgum-tech.github.io"];
 const METHODS = { telegram: "Telegram", phone: "Телефон", whatsapp: "WhatsApp" };
 
-const cors = {
-  "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+const corsFor = (origin) => ({
+  "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
-};
+  "Vary": "Origin",
+});
 
-const reply = (status, body) =>
+const replyTo = (status, body, origin) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { ...cors, "Content-Type": "application/json" },
+    headers: { ...corsFor(origin), "Content-Type": "application/json" },
   });
 
 const clean = (v, max) => String(v ?? "").trim().slice(0, max);
 
 export default {
   async fetch(request, env) {
-    if (request.method === "OPTIONS") return new Response(null, { headers: cors });
+    const origin = request.headers.get("Origin") ?? "";
+    const reply = (status, body) => replyTo(status, body, origin);
+    if (request.method === "OPTIONS") return new Response(null, { headers: corsFor(origin) });
     if (request.method !== "POST") return reply(405, { ok: false });
-    if (request.headers.get("Origin") !== ALLOWED_ORIGIN) return reply(403, { ok: false });
+    if (!ALLOWED_ORIGINS.includes(origin)) return reply(403, { ok: false });
 
     let data;
     try {
