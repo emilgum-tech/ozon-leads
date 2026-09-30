@@ -1,0 +1,67 @@
+:root {
+    --violet: #5b2bd6;
+    --blue: #2b4bf2;
+    --pink: #f0208c;
+    --soft: #f3edff;
+    --text: #1d1440;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0; font-family: "Segoe UI", Arial, sans-serif; color: var(--text);
+    background: #fff;
+}
+.hero {
+    background: linear-gradient(135deg, var(--blue), var(--violet) 55%, var(--pink));
+    color: #fff; padding: 56px 16px 90px; text-align: center;
+    border-radius: 0 0 50% 50% / 0 0 40px 40px;
+}
+.hero h1 { margin: 0 0 8px; font-size: clamp(28px, 6vw, 48px); }
+.hero p { margin: 0; opacity: .9; font-size: 18px; }
+main { max-width: 720px; margin: -50px auto 40px; padding: 0 16px; }
+.card {
+    background: #fff; border-radius: 20px; padding: 24px; margin-bottom: 20px;
+    box-shadow: 0 8px 30px rgba(91, 43, 214, .15);
+}
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.step { background: var(--soft); border-radius: 14px; padding: 16px; }
+.step b { display: block; color: var(--violet); font-size: 22px; }
+.form-card h2 {
+    margin: -24px -24px 20px; padding: 14px 24px; color: #fff;
+    background: linear-gradient(90deg, var(--violet), var(--pink));
+    border-radius: 20px 20px 0 0; font-size: 20px;
+}
+.field { margin-bottom: 14px; }
+label { display: block; font-weight: 600; margin-bottom: 4px; }
+input[type="text"], input[type="email"], textarea {
+    width: 100%; padding: 12px; border: 2px solid #e2d8fb; border-radius: 12px;
+    font: inherit; background: var(--soft);
+}
+input:focus, textarea:focus { outline: none; border-color: var(--violet); }
+textarea { min-height: 140px; resize: vertical; }
+input[type="submit"] {
+    width: 100%; padding: 15px; border: none; border-radius: 12px; cursor: pointer;
+    font: 700 17px inherit; color: #fff;
+    background: linear-gradient(90deg, var(--violet), var(--pink));
+}
+input[type="submit"]:hover { opacity: .9; }
+.flashes { list-style: none; padding: 0; margin: 0 0 20px; }
+.flashes li { padding: 12px 16px; border-radius: 12px; margin-bottom: 8px; font-weight: 600; }
+.success { background: #e6f4ea; color: #1e6b34; }
+.danger { background: #fdecea; color: #a12622; }
+.error { color: #c0172a; font-size: 13px; display: block; margin-top: 4px; }
+
+.methods { display: flex; gap: 8px; flex-wrap: wrap; }
+.method { flex: 1; margin: 0; cursor: pointer; }
+.method input { position: absolute; opacity: 0; }
+.method span {
+    display: block; text-align: center; padding: 12px 8px; border-radius: 12px;
+    border: 2px solid #e2d8fb; background: var(--soft); font-weight: 600;
+}
+.method input:checked + span {
+    color: #fff; border-color: transparent;
+    background: linear-gradient(90deg, var(--violet), var(--pink));
+}
+
+input[type="number"] { width: 100%; }
+[hidden] { display: none !important; }
+.check { display: flex; gap: 8px; align-items: center; font-weight: 400; margin-top: 8px; }

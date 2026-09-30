@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Оставить заявку</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="hero">
+        <h1>Оставьте заявку</h1>
+        <p>Напишите нам — свяжемся и ответим на все вопросы</p>
+    </header>
+    <main>
+        <section class="card">
+            <div class="steps">
+                <div class="step"><b>1</b>Заполняете форму</div>
+                <div class="step"><b>2</b>Мы получаем заявку сразу</div>
+                <div class="step"><b>3</b>Связываемся с вами</div>
+            </div>
+        </section>
+        <section class="card form-card">
+            <h2>Оставить заявку</h2>
+            <ul class="flashes" id="flash" hidden></ul>
+            <form id="lead-form" novalidate>
+                <div class="field">
+                    <label for="name">Имя</label>
+                    <input type="text" id="name" name="name" maxlength="100" autocomplete="name" required>
+                </div>
+                <div class="field">
+                    <label for="phone">Номер телефона</label>
+                    <input type="text" id="phone" name="phone" maxlength="30" autocomplete="tel" inputmode="tel" required>
+                </div>
+                <div class="field">
+                    <label>Как с вами связаться</label>
+                    <div class="methods">
+                        <label class="method"><input type="radio" name="method" value="telegram" checked><span>Telegram</span></label>
+                        <label class="method"><input type="radio" name="method" value="phone"><span>Телефон</span></label>
+                        <label class="method"><input type="radio" name="method" value="whatsapp"><span>WhatsApp</span></label>
+                    </div>
+                </div>
+                <div class="field" id="contact-tg">
+                    <label for="contact-tg-input">Укажите ник Telegram @</label>
+                    <input type="text" id="contact-tg-input" placeholder="@username" maxlength="33">
+                </div>
+                <div class="field" id="contact-wa" hidden>
+                    <label for="contact-wa-input">Укажите номер WhatsApp</label>
+                    <input type="text" id="contact-wa-input" placeholder="+7 900 000-00-00" maxlength="30">
+                    <label class="check"><input type="checkbox" id="same_number"> Тот же номер, что указан выше</label>
+                </div>
+                <div class="field">
+                    <label for="email">Email (необязательно)</label>
+                    <input type="email" id="email" name="email" maxlength="200" autocomplete="email">
+                </div>
+                <div class="field">
+                    <label for="message">Комментарий (необязательно)</label>
+                    <textarea id="message" name="message" maxlength="2000"></textarea>
+                </div>
+                <div style="display:none" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+                <input type="submit" id="submit" value="Оставить заявку">
+            </form>
+        </section>
+    </main>
+<script>
+(function () {
+    // Заявки уходят на воркер Cloudflare, он пересылает их в Telegram (токен бота хранится только там).
+    var ENDPOINT = 'https://ozon-leads.emilgum.workers.dev';
+    var form = document.getElementById('lead-form'), flash = document.getElementById('flash');
+    var tg = document.getElementById('contact-tg'), wa = document.getElementById('contact-wa');
+    var tgIn = document.getElementById('contact-tg-input'), waIn = document.getElementById('contact-wa-input');
+    var same = document.getElementById('same_number'), btn = document.getElementById('submit');
+
+    function method() { return form.querySelector('input[name="method"]:checked').value; }
+    function sync() {
+        tg.hidden = method() !== 'telegram';
+        wa.hidden = method() !== 'whatsapp';
+        waIn.disabled = same.checked;
+    }
+    form.querySelectorAll('input[name="method"]').forEach(function (r) { r.addEventListener('change', sync); });
+    same.addEventListener('change', sync);
+    sync();
+
+    function say(text, cls) {
+        flash.hidden = false;
+        flash.innerHTML = '';
+        var li = document.createElement('li');
+        li.className = cls; li.textContent = text;
+        flash.appendChild(li);
+        flash.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var m = method(), phoneRe = /^[\d\s+()\-]{7,}$/;
+        var name = form.elements.name.value.trim(), phone = form.elements.phone.value.trim();
+        var email = form.elements.email.value.trim();
+        var contact = m === 'telegram' ? tgIn.value.trim() : (m === 'whatsapp' && !same.checked ? waIn.value.trim() : '');
+        if (!name) return say('Укажите имя', 'danger');
+        if (!phoneRe.test(phone)) return say('Введите корректный номер телефона', 'danger');
+        if (m === 'telegram' && !/^@?[A-Za-z0-9_]{5,32}$/.test(contact)) return say('Укажите ник Telegram, например @username', 'danger');
+        if (m === 'whatsapp' && !same.checked && !phoneRe.test(contact)) return say('Укажите номер WhatsApp или отметьте «тот же номер»', 'danger');
+        if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return say('Введите корректный email', 'danger');
+
+        btn.disabled = true;
+        fetch(ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: name, phone: phone, method: m, contact: contact, email: email,
+                message: form.elements.message.value, website: form.elements.website.value
+            })
+        }).then(function (r) {
+            return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok && j.ok, j: j }; });
+        }).then(function (res) {
+            if (res.ok) { form.reset(); sync(); say('Спасибо! Мы скоро с вами свяжемся.', 'success'); }
+            else say(res.j.error || 'Не получилось отправить, попробуйте позже.', 'danger');
+        }).catch(function () {
+            say('Нет связи, попробуйте позже.', 'danger');
+        }).then(function () { btn.disabled = false; });
+    });
+})();
+</script>
+</body>
+</html>
